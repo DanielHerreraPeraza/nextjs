@@ -1,6 +1,7 @@
 import Link from 'next/link';
+import '../app/globals.css';
 
-export default function Home() {
+export default function Layout({ children }) {
 	return (
 		<div className='flex flex-col min-h-screen'>
 			<header className='bg-gray-800 text-white p-4'>
@@ -13,9 +14,7 @@ export default function Home() {
 					</div>
 				</nav>
 			</header>
-			<main className='flex-grow container mx-auto p-4 flex items-center justify-center'>
-				<h1 className='text-center text-5xl'>Cocina Verano Toreado 2025</h1>
-			</main>
+			<main className='flex-grow container mx-auto p-4'>{children}</main>
 			<footer className='bg-gray-800 text-white p-4 text-center'>
 				©2025 - Hogar para Adultos Mayores Corazón de Jesús de Puriscal
 			</footer>

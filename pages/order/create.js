@@ -1,6 +1,7 @@
-import '../../app/globals.css';
+import Layout from '../layout';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import Select from 'react-select';
 
 export default function CreateOrder() {
 	const [clientName, setClientName] = useState('');
@@ -87,95 +88,98 @@ export default function CreateOrder() {
 		}
 	};
 
+	const productOptions = products.map((product) => ({
+		value: product.name,
+		label: `${product.name} - ₡${product.price}`,
+	}));
+
 	return (
-		<div className='container mx-auto p-4'>
-			<h1 className='text-2xl font-bold mb-4'>Crear Orden</h1>
-			<form onSubmit={handleSubmit} className='space-y-4'>
-				<div>
-					<label className='block text-sm font-medium text-gray-700'>
-						Nombre del cliente
-					</label>
-					<input
-						type='text'
-						value={clientName}
-						onChange={(e) => setClientName(e.target.value)}
-						className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
-					/>
-				</div>
-				<div>
-					<label className='block text-sm font-medium text-gray-700'>
-						Productos
-					</label>
-					{selectedProducts.map((product, index) => (
-						<div key={index} className='flex space-x-4 mb-2'>
-							<select
-								value={product.name}
-								onChange={(e) =>
-									handleProductChange(index, 'name', e.target.value)
-								}
-								className='block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
-							>
-								<option value=''>Seleccione un producto</option>
-								{products.map((p) => (
-									<option key={p._id} value={p.name} data-price={p.price}>
-										{p.name} - ₡{p.price}
-									</option>
-								))}
-							</select>
-							<input
-								type='number'
-								value={product.quantity}
-								onChange={(e) =>
-									handleProductChange(index, 'quantity', e.target.value)
-								}
-								className='block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
-								min='1'
-							/>
-							<button
-								type='button'
-								onClick={() => handleRemoveProduct(index)}
-								className='bg-red-500 text-white px-4 py-2 rounded'
-							>
-								Eliminar
-							</button>
-						</div>
-					))}
+		<Layout>
+			<div className='container sm:w-lg md:w-lg mx-auto p-4'>
+				<h1 className='text-2xl font-bold mb-4'>Crear Orden</h1>
+				<form onSubmit={handleSubmit} className='space-y-4'>
+					<div>
+						<label className='block text-sm font-medium text-gray-700'>
+							Nombre del cliente
+						</label>
+						<input
+							type='text'
+							value={clientName}
+							onChange={(e) => setClientName(e.target.value)}
+							className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
+						/>
+					</div>
+					<div>
+						<label className='block text-sm font-medium text-gray-700'>
+							Productos
+						</label>
+						{selectedProducts.map((product, index) => (
+							<div key={index} className='flex space-x-4 mb-2'>
+								<Select
+									value={productOptions.find(
+										(option) => option.value === product.name
+									)}
+									onChange={(selectedOption) =>
+										handleProductChange(index, 'name', selectedOption.value)
+									}
+									options={productOptions}
+									className='block w-10/12'
+								/>
+								<input
+									type='number'
+									value={product.quantity}
+									onChange={(e) =>
+										handleProductChange(index, 'quantity', e.target.value)
+									}
+									className='block w-2/12 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
+									min='1'
+								/>
+								<button
+									type='button'
+									onClick={() => handleRemoveProduct(index)}
+									className='bg-red-500 text-white px-4 py-2 rounded'
+								>
+									Eliminar
+								</button>
+							</div>
+						))}
+						<button
+							type='button'
+							onClick={handleAddProduct}
+							className='bg-blue-500 text-white px-4 py-2 rounded'
+						>
+							Agregar Producto
+						</button>
+					</div>
+					<div>
+						<label className='block text-sm font-medium text-gray-700'>
+							Método de Pago
+						</label>
+						<select
+							value={paymentMethod}
+							onChange={(e) => setPaymentMethod(e.target.value)}
+							className='mt-1 block w-1/2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
+						>
+							<option value='cash'>Efectivo</option>
+							<option value='sinpe'>SINPE</option>
+						</select>
+					</div>
+					<div>
+						<label className='block text-sm font-bold text-gray-700'>
+							Total
+						</label>
+						<span className='block text-lg font-medium text-gray-900'>
+							₡{total}
+						</span>
+					</div>
 					<button
-						type='button'
-						onClick={handleAddProduct}
+						type='submit'
 						className='bg-blue-500 text-white px-4 py-2 rounded'
 					>
-						Agregar Producto
+						Crear
 					</button>
-				</div>
-				<div>
-					<label className='block text-sm font-medium text-gray-700'>
-						Método de Pago
-					</label>
-					<select
-						value={paymentMethod}
-						onChange={(e) => setPaymentMethod(e.target.value)}
-						className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
-					>
-						<option value='cash'>Efectivo</option>
-						<option value='sinpe'>SINPE</option>
-					</select>
-				</div>
-				<div>
-					<label className='block text-sm font-medium text-gray-700'>
-						Total
-					</label>
-					<span className='block text-sm font-medium text-gray-900'>
-						₡{total}
-					</span>
-				</div>
-				<button
-					type='submit'
-					className='bg-blue-500 text-white px-4 py-2 rounded'
-				>
-					Crear
-				</button>
-			</form>
-		</div>
+				</form>
+			</div>
+		</Layout>
 	);
 }

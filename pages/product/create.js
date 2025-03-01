@@ -1,3 +1,4 @@
+import Layout from '../layout';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 
@@ -22,38 +23,42 @@ export default function CreateProduct() {
 	};
 
 	return (
-		<div className='container mx-auto p-4'>
-			<h1 className='text-2xl font-bold mb-4'>Crear Producto</h1>
-			<form onSubmit={handleSubmit} className='space-y-4'>
-				<div>
-					<label className='block text-sm font-medium text-gray-700'>
-						Nombre
-					</label>
-					<input
-						type='text'
-						value={name}
-						onChange={(e) => setName(e.target.value)}
-						className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
-					/>
-				</div>
-				<div>
-					<label className='block text-sm font-medium text-gray-700'>
-						Precio
-					</label>
-					<input
-						type='number'
-						value={price}
-						onChange={(e) => setPrice(e.target.value)}
-						className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
-					/>
-				</div>
-				<button
-					type='submit'
-					className='bg-blue-500 text-white px-4 py-2 rounded'
-				>
-					Crear
-				</button>
-			</form>
-		</div>
+		<Layout>
+			<div className='container sm:w-sm md:w-md mx-auto p-4'>
+				<h1 className='text-2xl font-bold mb-4'>Crear Producto</h1>
+				<form onSubmit={handleSubmit} className='space-y-4'>
+					<div>
+						<label className='block text-sm font-medium text-gray-700'>
+							Nombre
+						</label>
+						<input
+							type='text'
+							value={name}
+							onChange={(e) => setName(e.target.value)}
+							className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
+						/>
+					</div>
+					<div>
+						<label className='block text-sm font-medium text-gray-700'>
+							Precio
+						</label>
+						<input
+							type='number'
+							value={price}
+							onChange={(e) => setPrice(e.target.value)}
+							className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
+						/>
+					</div>
+					<div className='flex justify-center'>
+						<button
+							type='submit'
+							className='bg-blue-500 text-white px-4 py-2 rounded'
+						>
+							Crear
+						</button>
+					</div>
+				</form>
+			</div>
+		</Layout>
 	);
 }

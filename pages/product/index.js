@@ -1,4 +1,4 @@
-import '../../app/globals.css';
+import Layout from '../layout';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 
@@ -27,36 +27,38 @@ export default function Product() {
 	};
 
 	return (
-		<div className='container mx-auto p-4'>
-			<h1 className='text-2xl font-bold mb-4'>Productos</h1>
-			<button
-				className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
-				onClick={handleCreateClick}
-			>
-				Nuevo Producto
-			</button>
-			<table className='min-w-full bg-white border border-gray-200 mt-4'>
-				<thead>
-					<tr>
-						<th className='py-2 px-4 border-b'>ID</th>
-						<th className='py-2 px-4 border-b'>Nombre</th>
-						<th className='py-2 px-4 border-b'>Precio</th>
-					</tr>
-				</thead>
-				<tbody>
-					{products.map((product) => (
-						<tr
-							key={product._id}
-							className='cursor-pointer hover:bg-gray-100'
-							onClick={() => handleRowClick(product)}
-						>
-							<td className='py-2 px-4 border-b'>{product._id}</td>
-							<td className='py-2 px-4 border-b'>{product.name}</td>
-							<td className='py-2 px-4 border-b'>{product.price}</td>
+		<Layout>
+			<div className='container mx-auto p-4'>
+				<div className='flex justify-between items-center mb-4'>
+					<h1 className='text-2xl font-bold'>Productos</h1>
+					<button
+						className='bg-blue-500 text-white px-4 py-2 rounded w-2/12'
+						onClick={handleCreateClick}
+					>
+						Crear Producto
+					</button>
+				</div>
+				<table className='min-w-full bg-white border border-gray-200 mt-4 text-left'>
+					<thead>
+						<tr>
+							<th className='py-2 px-4 border-b'>Nombre</th>
+							<th className='py-2 px-4 border-b'>Precio</th>
 						</tr>
-					))}
-				</tbody>
-			</table>
-		</div>
+					</thead>
+					<tbody>
+						{products.map((product) => (
+							<tr
+								key={product._id}
+								className='cursor-pointer hover:bg-gray-100'
+								onClick={() => handleRowClick(product)}
+							>
+								<td className='py-2 px-4 border-b'>{product.name}</td>
+								<td className='py-2 px-4 border-b'>{product.price}</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</div>
+		</Layout>
 	);
 }
