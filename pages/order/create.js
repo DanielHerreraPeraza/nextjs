@@ -139,7 +139,7 @@ export default function CreateOrder() {
 									onClick={() => handleRemoveProduct(index)}
 									className='bg-red-500 text-white px-4 py-2 rounded'
 								>
-									Eliminar
+									-
 								</button>
 							</div>
 						))}
@@ -158,7 +158,7 @@ export default function CreateOrder() {
 						<select
 							value={paymentMethod}
 							onChange={(e) => setPaymentMethod(e.target.value)}
-							className='mt-1 block w-1/2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
+							className='mt-1 block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm sm:w-12/12 md:w-4/12'
 						>
 							<option value='cash'>Efectivo</option>
 							<option value='sinpe'>SINPE</option>
@@ -172,12 +172,14 @@ export default function CreateOrder() {
 							₡{total}
 						</span>
 					</div>
-					<button
-						type='submit'
-						className='bg-blue-500 text-white px-4 py-2 rounded'
-					>
-						Crear
-					</button>
+					<div className='flex justify-center'>
+						<button
+							type='submit'
+							className='bg-blue-500 text-white px-4 py-2 rounded'
+						>
+							Crear
+						</button>
+					</div>
 				</form>
 			</div>
 		</Layout>

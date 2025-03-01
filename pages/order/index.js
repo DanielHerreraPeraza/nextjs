@@ -57,13 +57,13 @@ export default function Order() {
 				<div className='flex justify-between items-center mb-4'>
 					<h1 className='text-2xl font-bold'>Ordenes</h1>
 					<button
-						className='bg-blue-500 text-white px-4 py-2 rounded w-2/12'
+						className='bg-blue-500 text-white px-4 py-2 rounded'
 						onClick={handleCreateOrderClick}
 					>
 						Crear Orden
 					</button>
 				</div>
-				<div className='grid grid-cols-2 gap-4'>
+				<div className='grid sm:grid-cols-1 md:grid-cols-2 gap-4'>
 					{orders.map((order, orderIndex) => (
 						<div
 							key={order._id}

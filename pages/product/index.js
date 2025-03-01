@@ -32,7 +32,7 @@ export default function Product() {
 				<div className='flex justify-between items-center mb-4'>
 					<h1 className='text-2xl font-bold'>Productos</h1>
 					<button
-						className='bg-blue-500 text-white px-4 py-2 rounded w-2/12'
+						className='bg-blue-500 text-white px-4 py-2 rounded'
 						onClick={handleCreateClick}
 					>
 						Crear Producto
