@@ -9,6 +9,7 @@ export default function CreateOrder() {
 	const [selectedProducts, setSelectedProducts] = useState([]);
 	const [paymentMethod, setPaymentMethod] = useState('cash');
 	const [total, setTotal] = useState(0);
+	const [showPopup, setShowPopup] = useState(false);
 	const router = useRouter();
 
 	useEffect(() => {
@@ -66,8 +67,7 @@ export default function CreateOrder() {
 		setTotal(total);
 	};
 
-	const handleSubmit = async (e) => {
-		e.preventDefault();
+	const handleSubmit = async () => {
 		const res = await fetch('/api/orders', {
 			method: 'POST',
 			headers: {
@@ -93,11 +93,24 @@ export default function CreateOrder() {
 		label: `${product.name} - ₡${product.price}`,
 	}));
 
+	const handleCreateClick = () => {
+		setShowPopup(true);
+	};
+
+	const handleCancelClick = () => {
+		setShowPopup(false);
+	};
+
+	const handleConfirmClick = async () => {
+		setShowPopup(false);
+		await handleSubmit();
+	};
+
 	return (
 		<Layout>
 			<div className='container sm:w-lg md:w-lg mx-auto p-4'>
 				<h1 className='text-2xl font-bold mb-4'>Crear Orden</h1>
-				<form onSubmit={handleSubmit} className='space-y-4'>
+				<form onSubmit={(e) => e.preventDefault()} className='space-y-4'>
 					<div>
 						<label className='block text-sm font-medium text-gray-700'>
 							Nombre del cliente
@@ -174,13 +187,53 @@ export default function CreateOrder() {
 					</div>
 					<div className='flex justify-center'>
 						<button
-							type='submit'
+							type='button'
+							onClick={handleCreateClick}
 							className='bg-blue-500 text-white px-4 py-2 rounded'
 						>
 							Crear
 						</button>
 					</div>
 				</form>
+				{showPopup && (
+					<div className='fixed inset-0 flex items-center justify-center bg-black bg-opacity-50'>
+						<div className='bg-white p-8 rounded shadow-lg'>
+							<h2 className='text-xl font-bold mb-4'>Detalles de la Orden</h2>
+							<p>
+								<strong>Nombre del cliente:</strong> {clientName}
+							</p>
+							<div className='mt-4'>
+								<h3 className='font-bold'>Productos:</h3>
+								<ul>
+									{selectedProducts.map((product, index) => (
+										<li key={index}>
+											{product.name} x {product.quantity}
+										</li>
+									))}
+								</ul>
+							</div>
+							<div className='mt-4'>
+								<p>
+									<strong>Total:</strong> ₡{total}
+								</p>
+							</div>
+							<div className='flex justify-end mt-4'>
+								<button
+									onClick={handleCancelClick}
+									className='bg-gray-500 text-white px-4 py-2 rounded mr-2'
+								>
+									Cancelar
+								</button>
+								<button
+									onClick={handleConfirmClick}
+									className='bg-blue-500 text-white px-4 py-2 rounded'
+								>
+									Confirmar
+								</button>
+							</div>
+						</div>
+					</div>
+				)}
 			</div>
 		</Layout>
 	);

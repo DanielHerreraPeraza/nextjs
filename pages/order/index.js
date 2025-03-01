@@ -80,8 +80,10 @@ export default function Order() {
 								<ul className='mb-2'>
 									{order.products.map((product, productIndex) => (
 										<li key={productIndex} className='text-gray-700 flex m-1'>
-											<span className='w-5/12'>{product.name}</span>
-											<span className='w-5/12'>{product.quantity}</span>
+											<span className='w-10/12'>
+												{product.name} x {product.quantity}
+											</span>
+											{/* <span className='w-5/12'>{product.quantity}</span> */}
 											<input
 												className='w-2/12'
 												type='checkbox'
