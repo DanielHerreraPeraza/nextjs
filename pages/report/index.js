@@ -63,13 +63,14 @@ export default function Report() {
 
 	return (
 		<Layout>
-			<div className='container mx-auto p-4 sm:w-sm md:w-md'>
-				<h1 className='text-2xl font-bold'>Reportes</h1>
-				<div className='mt-14'>
+			<div className='container mx-auto p-4'>
+				<h1 className='text-2xl font-bold mb-4'>Reportes</h1>
+				<div className='mb-8'>
+					<h2 className='text-xl font-bold mb-4'>Órdenes por Método de Pago</h2>
 					<PieChart width={400} height={400}>
 						<Pie
 							data={paymentData}
-							dataKey='count'
+							dataKey='total'
 							nameKey='paymentMethod'
 							cx='50%'
 							cy='50%'
@@ -87,11 +88,44 @@ export default function Report() {
 						<Tooltip />
 						<Legend />
 					</PieChart>
-					<h2 className='text-xl font-bold mt-4 mb-4'>
-						Ventas por método de pago
-					</h2>
 				</div>
-				{/* <div className='mt-14'>
+				<div className='mb-8'>
+					<h2 className='text-xl font-bold mb-4'>
+						Detalles de Órdenes por Método de Pago
+					</h2>
+					<table className='min-w-full bg-white'>
+						<thead>
+							<tr>
+								<th className='py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-sm leading-4 font-medium text-gray-700 uppercase tracking-wider'>
+									Método de Pago
+								</th>
+								<th className='py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-sm leading-4 font-medium text-gray-700 uppercase tracking-wider'>
+									Número de Órdenes
+								</th>
+								<th className='py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-sm leading-4 font-medium text-gray-700 uppercase tracking-wider'>
+									Total
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							{paymentData.map((entry, index) => (
+								<tr key={index}>
+									<td className='py-2 px-4 border-b border-gray-200'>
+										{entry.paymentMethod === 'cash' ? 'Efectivo' : 'Sinpe'}
+									</td>
+									<td className='py-2 px-4 border-b border-gray-200'>
+										{entry.count}
+									</td>
+									<td className='py-2 px-4 border-b border-gray-200'>
+										₡{entry.total}
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
+				{/* <div>
+					<h2 className='text-xl font-bold mb-4'>Productos por Nombre</h2>
 					<BarChart width={600} height={300} data={productData}>
 						<XAxis dataKey='name' />
 						<YAxis />
@@ -99,9 +133,6 @@ export default function Report() {
 						<Legend />
 						<Bar dataKey='quantity' fill='#8884d8' />
 					</BarChart>
-					<h2 className='text-xl font-bold mb-4'>
-						Cantidad de productos vendidos
-					</h2>
 				</div> */}
 			</div>
 		</Layout>
