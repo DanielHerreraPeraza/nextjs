@@ -22,3 +22,54 @@ body {
 	background: var(--background);
 	font-family: Arial, Helvetica, sans-serif;
 }
+
+@page {
+	margin: 0;
+}
+
+@media print {
+	body {
+		margin: 0;
+		padding: 0;
+		width: 79mm;
+		font-family: monospace;
+		font-size: 10pt;
+	}
+
+	.ticket {
+		width: 79mm;
+		padding: 5mm;
+		box-sizing: border-box;
+	}
+
+	h2 {
+		text-align: center;
+		margin: 0 0 10px;
+	}
+
+	ul {
+		list-style: none;
+		padding: 0;
+		margin: 0 0 10px;
+	}
+
+	li {
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: 4px;
+	}
+
+	hr {
+		border: none;
+		border-top: 1px dashed #000;
+		margin: 10px 0;
+	}
+
+	p {
+		margin: 4px 0;
+	}
+
+	button {
+		display: none !important;
+	}
+}

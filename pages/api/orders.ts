@@ -20,7 +20,7 @@ export default async function handler(
 			res.status(200).json(orders);
 		} else if (req.method === 'POST') {
 			const {
-				clientName,
+				tableNumber,
 				products,
 				creationDate,
 				status,
@@ -28,7 +28,7 @@ export default async function handler(
 				paymentMethod,
 			} = req.body;
 			const result = await collection.insertOne({
-				clientName,
+				tableNumber,
 				products,
 				creationDate,
 				status,

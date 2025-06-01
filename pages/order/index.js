@@ -1,124 +1,381 @@
 import Layout from '../layout';
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
+import { useState, useEffect } from 'react';
+import Select from 'react-select';
+import { IconButton } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import printReceipts from '../components/printReceipts';
 
-export default function Order() {
-	const [orders, setOrders] = useState([]);
-	const router = useRouter();
+export default function CreateOrder() {
+	const [tableNumber, setTableNumber] = useState('');
+	const [products, setProducts] = useState([]);
+	const [selectedProducts, setSelectedProducts] = useState([]);
+	const [paymentMethod, setPaymentMethod] = useState('efectivo');
+	const [total, setTotal] = useState(0);
+	const [montoRecibido, setMontoRecibido] = useState(0);
+	const [showPopup, setShowPopup] = useState(false);
 
 	useEffect(() => {
-		const fetchOrders = async () => {
-			const res = await fetch('/api/orders');
+		const fetchProducts = async () => {
+			const res = await fetch('/api/products?status=enabled');
 			const data = await res.json();
-			setOrders(data);
+			setProducts(data);
 		};
 
-		fetchOrders();
+		fetchProducts();
 	}, []);
 
-	const handleFinishClick = async (orderId) => {
+	useEffect(() => {
+		calculateTotal();
+	}, [selectedProducts]);
+
+	const handleProductChange = (index, field, value) => {
+		const newSelectedProducts = [...selectedProducts];
+		newSelectedProducts[index] = {
+			...newSelectedProducts[index],
+			[field]: value,
+		};
+
+		if (field === 'name') {
+			const selectedProduct = products.find(
+				(product) => product.name === value
+			);
+			if (selectedProduct) {
+				newSelectedProducts[index].price = selectedProduct.price;
+			}
+		}
+
+		setSelectedProducts(newSelectedProducts);
+	};
+
+	const handleAddProduct = () => {
+		const newSelectedProducts = [
+			...selectedProducts,
+			{ name: '', quantity: 1, price: 0 },
+		];
+		setSelectedProducts(newSelectedProducts);
+	};
+
+	const handleRemoveProduct = (index) => {
+		const newSelectedProducts = selectedProducts.filter((_, i) => i !== index);
+		setSelectedProducts(newSelectedProducts);
+	};
+
+	const calculateTotal = () => {
+		const total = selectedProducts.reduce((sum, product) => {
+			const productPrice = product.price || 0;
+			const productQuantity = product.quantity || 1;
+			return sum + productPrice * productQuantity;
+		}, 0);
+		setTotal(total);
+	};
+
+	const handleSubmit = async () => {
 		const res = await fetch('/api/orders', {
-			method: 'PUT',
+			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
 			},
-			body: JSON.stringify({ id: orderId, status: 'closed' }),
+			body: JSON.stringify({
+				tableNumber,
+				products: selectedProducts,
+				creationDate: new Date().toISOString(),
+				status: 'open',
+				total: total,
+				paymentMethod,
+			}),
 		});
 
 		if (res.ok) {
+			await printReceipts({ products: selectedProducts, table: tableNumber });
 			window.location.reload();
 		}
 	};
 
-	const handleCreateOrderClick = () => {
-		router.push('/order/create');
+	const productOptions = products.map((product) => ({
+		value: product.name,
+		label: `${product.name} ${'.'.repeat(50 - product.name.length)} ₡${
+			product.price
+		}`,
+	}));
+
+	const handleCreateClick = () => {
+		const updatedSelectedProducts = selectedProducts.map((selectedProduct) => {
+			const product = products.find((p) => p.name === selectedProduct.name);
+			return {
+				...selectedProduct,
+				category: product ? product.category : null,
+			};
+		});
+
+		setSelectedProducts(updatedSelectedProducts);
+
+		setShowPopup(true);
 	};
 
-	const toggleCheckbox = (orderIndex, productIndex) => {
-		const newOrders = [...orders];
-		newOrders[orderIndex].products[productIndex].checked =
-			!newOrders[orderIndex].products[productIndex].checked;
-		setOrders(newOrders);
+	const handleCancelClick = () => {
+		setShowPopup(false);
 	};
 
-	const allChecked = (products) => {
-		return products.every((product) => product.checked);
+	const handleConfirmClick = async () => {
+		setShowPopup(false);
+		await handleSubmit();
 	};
-
-	function mapPayment(paymentMethod) {
-		if (paymentMethod === null) return;
-
-		return paymentMethod === 'cash' ? 'Efectivo' : 'Sinpe';
-	}
 
 	return (
 		<Layout>
 			<div className='container mx-auto p-4'>
-				<div className='flex justify-between items-center mb-4'>
-					<h1 className='text-2xl font-bold'>Ordenes</h1>
-					<button
-						className='bg-blue-500 text-white px-4 py-2 rounded'
-						onClick={handleCreateOrderClick}
-					>
-						Crear Orden
-					</button>
-				</div>
-				<div className='grid sm:grid-cols-1 md:grid-cols-2 gap-4'>
-					{orders.map((order, orderIndex) => (
-						<div
-							key={order._id}
-							className='bg-white p-4 m-2 rounded shadow flex flex-col justify-between'
-						>
-							<div>
-								<div className='flex justify-between items-center mb-4'>
-									<h2 className='text-xl font-bold mb-2'>{order.clientName}</h2>
-									<p className='text-gray-700 mb-2'>
-										{new Date(order.creationDate).toLocaleString()}
-									</p>
-								</div>
-								<hr className='border-t border-gray-200 mb-4' />
-								<ul className='mb-2'>
-									{order.products.map((product, productIndex) => (
-										<li key={productIndex} className='text-gray-700 flex m-1'>
-											<span className='w-10/12'>
-												{product.name} x {product.quantity}
-											</span>
-											{/* <span className='w-5/12'>{product.quantity}</span> */}
-											<input
-												className='w-2/12'
-												type='checkbox'
-												checked={product.checked || false}
-												onChange={() =>
-													toggleCheckbox(orderIndex, productIndex)
-												}
-											/>
-										</li>
-									))}
-								</ul>
-								<hr className='border-t border-gray-200 mb-4' />
+				<h1 className='text-2xl font-bold mb-4'>Crear Orden</h1>
+				<div>
+					<form onSubmit={(e) => e.preventDefault()} className='space-y-4'>
+						<div className='grid grid-cols-12 gap-4'>
+							<div className='col-span-2'>
+								<label className='block text-sm font-medium text-gray-700'>
+									Número de Mesa
+								</label>
+								<input
+									type='number'
+									value={tableNumber}
+									onChange={(e) => setTableNumber(e.target.value)}
+									className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
+									min={1}
+								/>
 							</div>
-							<div className='flex justify-between items-center'>
-								<span className='text-gray-700 font-bold'>
-									Total: ₡{order.total}
-								</span>
-								<span className='text-gray-700 font-bold'>
-									{mapPayment(order.paymentMethod)}
-								</span>
-								<button
-									className={`bg-blue-500 text-white px-4 py-2 rounded ${
-										!allChecked(order.products)
-											? 'opacity-50 cursor-not-allowed'
-											: ''
-									}`}
-									onClick={() => handleFinishClick(order._id)}
-									disabled={!allChecked(order.products)}
+							<div className='col-span-2'>
+								<label className='text-sm font-medium text-gray-700'>
+									Método de Pago
+								</label>
+								<select
+									value={paymentMethod}
+									onChange={(e) => {
+										setPaymentMethod(e.target.value);
+										if (e.target.value === 'efectivo') {
+											setMontoRecibido(0); // Reset montoRecibido to 0 for efectivo
+										}
+									}}
+									className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
 								>
-									Finalizar
+									<option value='efectivo'>Efectivo</option>
+									<option value='sinpe'>SINPE</option>
+									<option value='tarjeta'>Tarjeta</option>
+									<option value='tiquete'>Tiquete</option>
+								</select>
+							</div>
+						</div>
+
+						<div>
+							<label className='block text-sm font-medium text-gray-700'>
+								Productos
+							</label>
+							{selectedProducts.map((product, index) => (
+								<div key={index} className=''>
+									<div className='grid grid-cols-12 gap-x-4 mb-3'>
+										<div className='col-span-4'>
+											<Select
+												value={productOptions.find(
+													(option) => option.value === product.name
+												)}
+												onChange={(selectedOption) =>
+													handleProductChange(
+														index,
+														'name',
+														selectedOption.value
+													)
+												}
+												options={productOptions}
+												className=''
+											/>
+										</div>
+										<div className='col-span-1'>
+											<input
+												type='number'
+												value={product.quantity}
+												onChange={(e) =>
+													handleProductChange(index, 'quantity', e.target.value)
+												}
+												className='block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
+												min='1'
+											/>
+										</div>
+										<div className='col-span-6'>
+											<input
+												type='text'
+												value={product.details || ''}
+												onChange={(e) =>
+													handleProductChange(index, 'details', e.target.value)
+												}
+												className='block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
+												placeholder='Ingrese detalles adicionales'
+											/>
+										</div>
+										<div className='col-span-1 flex items-center justify-center'>
+											<IconButton
+												onClick={() => handleRemoveProduct(index)}
+												color='error'
+												size='small'
+											>
+												<DeleteIcon />
+											</IconButton>
+										</div>
+									</div>
+								</div>
+							))}
+							<button
+								type='button'
+								onClick={handleAddProduct}
+								className='bg-blue-500 text-white px-4 py-2 rounded'
+							>
+								Agregar Producto
+							</button>
+						</div>
+
+						<div className='grid grid-cols-3 gap-4'>
+							{/* {paymentMethod === 'efectivo' && (
+								<div>
+									<label className='text-sm font-medium text-gray-700'>
+										Monto a Recibir
+									</label>
+									<input
+										type='number'
+										value={montoRecibido}
+										onChange={(e) => setMontoRecibido(Number(e.target.value))}
+										className='mt-1 block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm w-full'
+										placeholder='Ingrese monto'
+										min={0}
+									/>
+								</div>
+							)} */}
+							{/* {paymentMethod === 'efectivo' && (
+								<div>
+									<label className='block text-sm font-bold text-gray-700'>
+										Vuelto
+									</label>
+									<span className='block text-lg font-medium text-gray-900'>
+										₡{montoRecibido <= 0 ? 0 : montoRecibido - total}
+									</span>
+								</div>
+							)} */}
+						</div>
+
+						<div className='flex justify-center'>
+							<button
+								type='button'
+								onClick={handleCreateClick}
+								className='bg-blue-500 text-white px-4 py-2 rounded'
+							>
+								Crear
+							</button>
+						</div>
+					</form>
+				</div>
+				{showPopup && (
+					<div className='fixed inset-0 flex items-center justify-center bg-black bg-opacity-50'>
+						<div className='bg-white p-8 rounded shadow-lg w-1/2 max-w-2xl'>
+							<h2 className='text-xl font-bold mb-4'>Detalles de la Orden</h2>
+							<p>
+								<strong>Número de mesa:</strong> {tableNumber}
+							</p>
+							<p>
+								<strong>Método de pago:</strong> {paymentMethod}
+							</p>
+							<div className='mt-4 grid grid-cols-2 gap-4'>
+								{['Bebida', 'Comida'].map((category) => (
+									<div key={category}>
+										<h3 className='font-bold'>{category}</h3>
+										<ul>
+											{selectedProducts
+												.filter(
+													(selectedProduct) =>
+														selectedProduct.category === category
+												)
+												.map((product, index) => (
+													<li
+														key={index}
+														className='flex flex-col justify-between'
+													>
+														<div className='flex justify-between'>
+															<span>
+																{product.quantity} x {product.name}
+															</span>
+															<span className='flex-grow border-dotted border-b border-gray-300 mx-2'></span>
+															<span>₡{product.price * product.quantity}</span>
+														</div>
+														{product.details && (
+															<div className='text-xs text-gray-500 mt-1'>
+																{product.details}
+															</div>
+														)}
+													</li>
+												))}
+											<div className='flex justify-between mt-2'>
+												<strong>Subtotal: </strong>
+												<span className='flex-grow border-dotted border-b border-gray-300 mx-2'></span>
+												<span>
+													₡
+													{selectedProducts
+														.filter(
+															(selectedProduct) =>
+																selectedProduct.category === category
+														)
+														.reduce((sum, product) => {
+															return sum + product.price * product.quantity;
+														}, 0)}
+												</span>
+											</div>
+										</ul>
+										<hr className='border-t border-gray-300 mt-4 mb-4' />
+									</div>
+								))}
+							</div>
+							<div className='flex justify-between mt-2 mb-2'>
+								<p>
+									<strong>Total:</strong>
+								</p>
+								<span className='flex-grow border-dotted border-b border-gray-300 mx-2'></span>
+								<p>₡{total}</p>
+							</div>
+							{paymentMethod === 'efectivo' && (
+								<div className='grid grid-cols-2 gap-4'>
+									<div className='flex items-center gap-4'>
+										<label className='text-sm font-medium text-gray-700'>
+											Monto a Recibir
+										</label>
+										<input
+											type='number'
+											value={montoRecibido}
+											onChange={(e) => setMontoRecibido(Number(e.target.value))}
+											className='block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm w-full'
+											placeholder='Ingrese monto'
+											min={0}
+										/>
+									</div>
+									<div>
+										<div className='flex justify-between mt-2'>
+											<p>
+												<strong>Vuelto:</strong>
+											</p>
+											<span className='flex-grow border-dotted border-b border-gray-300 mx-2'></span>
+											<p>₡{montoRecibido <= 0 ? 0 : montoRecibido - total}</p>
+										</div>
+									</div>
+								</div>
+							)}
+							<div className='flex justify-end mt-4'>
+								<button
+									onClick={handleCancelClick}
+									className='bg-gray-500 text-white px-4 py-2 rounded mr-2'
+								>
+									Cancelar
+								</button>
+								<button
+									onClick={handleConfirmClick}
+									className='bg-blue-500 text-white px-4 py-2 rounded'
+								>
+									Confirmar
 								</button>
 							</div>
 						</div>
-					))}
-				</div>
+					</div>
+				)}
 			</div>
 		</Layout>
 	);
