@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import Select from 'react-select';
 import { IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import printReceipts from '../components/printReceipts';
+import printReceipts from '../../components/printReceipts';
 
 export default function CreateOrder() {
 	const [tableNumber, setTableNumber] = useState('');
