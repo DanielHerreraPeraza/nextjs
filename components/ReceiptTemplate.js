@@ -10,10 +10,10 @@ export const generateReceiptHTML = (products, category, table) => {
             page-break-after: always;
           }
         }
-        body { font-family: monospace; padding: 10px; font-size: 16px; } /* Increased font size */
-        .title { text-align: center; font-weight: bold; font-size: 18px; } /* Larger title font */
-        .item { display: flex; justify-content: space-between; font-size: 16px; } /* Larger item font */
-        .details { font-size: 14px; } /* Adjusted details font size */
+        body { font-family: monospace; padding: 10px; font-size: 18px; } /* Increased font size */
+        .title { text-align: center; font-weight: bold; font-size: 20px; } /* Larger title font */
+        .item { display: flex; justify-content: space-between; font-size: 18px; } /* Larger item font */
+        .details { font-size: 16px; } /* Adjusted details font size */
       </style>
     `;
 
