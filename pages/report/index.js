@@ -19,7 +19,23 @@ export default function Report() {
 
 	useEffect(() => {
 		const fetchClosedOrders = async () => {
-			const res = await fetch('/api/reports');
+			// Define the timezone
+			const timezone = 'America/Costa_Rica';
+
+			// Get the current date in the specified timezone
+			const now = new Date();
+			const formatter = new Intl.DateTimeFormat('en-GB', {
+				timeZone: timezone,
+				year: 'numeric',
+				month: '2-digit',
+				day: '2-digit',
+			});
+
+			// Extract the date part in DD/MM/YYYY format
+			const currentDate = formatter.format(now); // Example: "01/06/2025"
+
+			// Fetch data from the new API with the current date as a query parameter
+			const res = await fetch(`/api/reports?date=${currentDate}`);
 			const data = await res.json();
 			setOrders(data);
 
@@ -65,9 +81,8 @@ export default function Report() {
 		<Layout>
 			<div className='container mx-auto p-4'>
 				<h1 className='text-2xl font-bold mb-4'>Reportes</h1>
-				<div className='mb-8'>
-					<h2 className='text-xl font-bold mb-4'>Órdenes por Método de Pago</h2>
-					<PieChart width={400} height={400}>
+				<div className='flex justify-center items-center'>
+					<PieChart width={600} height={500}>
 						<Pie
 							data={paymentData}
 							dataKey='total'
@@ -76,7 +91,7 @@ export default function Report() {
 							cy='50%'
 							outerRadius={150}
 							fill='#8884d8'
-							label
+							label={({ name, value }) => `₡${value}`} // Custom label with ₡ symbol
 						>
 							{paymentData.map((entry, index) => (
 								<Cell
@@ -85,7 +100,8 @@ export default function Report() {
 								/>
 							))}
 						</Pie>
-						<Tooltip />
+						<Tooltip formatter={(value) => `₡${value}`} />{' '}
+						{/* Add ₡ to tooltip values */}
 						<Legend />
 					</PieChart>
 				</div>
@@ -111,7 +127,7 @@ export default function Report() {
 							{paymentData.map((entry, index) => (
 								<tr key={index}>
 									<td className='py-2 px-4 border-b border-gray-200'>
-										{entry.paymentMethod === 'cash' ? 'Efectivo' : 'Sinpe'}
+										{entry.paymentMethod}
 									</td>
 									<td className='py-2 px-4 border-b border-gray-200'>
 										{entry.count}
@@ -121,19 +137,31 @@ export default function Report() {
 									</td>
 								</tr>
 							))}
+							{/* Add a row for the total sum and total number of orders */}
+							<tr>
+								<td className='py-2 px-4 border-t border-gray-300 font-bold'>
+									Total General
+								</td>
+								<td className='py-2 px-4 border-t border-gray-300 font-bold'>
+									{paymentData.reduce((sum, entry) => sum + entry.count, 0)}
+								</td>
+								<td className='py-2 px-4 border-t border-gray-300 font-bold'>
+									₡{paymentData.reduce((sum, entry) => sum + entry.total, 0)}
+								</td>
+							</tr>
 						</tbody>
 					</table>
 				</div>
 				{/* <div>
-					<h2 className='text-xl font-bold mb-4'>Productos por Nombre</h2>
-					<BarChart width={600} height={300} data={productData}>
-						<XAxis dataKey='name' />
-						<YAxis />
-						<Tooltip />
-						<Legend />
-						<Bar dataKey='quantity' fill='#8884d8' />
-					</BarChart>
-				</div> */}
+                    <h2 className='text-xl font-bold mb-4'>Productos por Nombre</h2>
+                    <BarChart width={600} height={300} data={productData}>
+                        <XAxis dataKey='name' />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        <Bar dataKey='quantity' fill='#8884d8' />
+                    </BarChart>
+                </div> */}
 			</div>
 		</Layout>
 	);

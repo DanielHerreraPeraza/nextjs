@@ -70,6 +70,28 @@ export default function CreateOrder() {
 	};
 
 	const handleSubmit = async () => {
+		const timezone = 'America/Costa_Rica'; // Replace with your desired timezone
+		const now = new Date();
+
+		// Format the date manually as DD/MM/YYYYT06:45:10
+		const formatter = new Intl.DateTimeFormat('en-GB', {
+			timeZone: timezone,
+			year: 'numeric',
+			month: '2-digit',
+			day: '2-digit',
+			hour: '2-digit',
+			minute: '2-digit',
+			second: '2-digit',
+			hour12: false, // Ensure 24-hour format
+		});
+
+		// Format the date and time separately
+		const datePart = formatter.format(now).split(', ')[0]; // Extract DD/MM/YYYY
+		const timePart = formatter.format(now).split(', ')[1]; // Extract HH:mm:ss
+
+		// Combine date and time into the correct format
+		const formattedCreationDate = `${datePart}T${timePart}`;
+
 		const res = await fetch('/api/orders', {
 			method: 'POST',
 			headers: {
@@ -78,7 +100,7 @@ export default function CreateOrder() {
 			body: JSON.stringify({
 				tableNumber,
 				products: selectedProducts,
-				creationDate: new Date().toISOString(),
+				creationDate: formattedCreationDate,
 				status: 'open',
 				total: total,
 				paymentMethod,

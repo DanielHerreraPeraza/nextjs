@@ -9,7 +9,7 @@ export default function Layout({ children }) {
 					<Link href='/'>Inicio</Link>
 					<div className='container mx-1 flex justify-evenly'>
 						<Link href='/product'>Productos</Link>
-						<Link href='/order'>Órden</Link>
+						<Link href='/order'>Orden</Link>
 						<Link href='/report'>Reporte</Link>
 					</div>
 				</nav>
